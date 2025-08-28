@@ -178,4 +178,221 @@ router.post('/', auth, validateEntryInput, async (req, res) => {
         console.error('Create entry error:', error);
         
         if (error.name === 'ValidationError') {
-            const errors = Object.values(error.errors).map(err =>
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                message: 'Validation failed',
+                errors
+            });
+        }
+        
+        res.status(500).json({
+            message: 'Server error creating entry'
+        });
+    }
+});
+
+// @route   PUT /api/entries/:id
+// @desc    Update entry
+// @access  Private
+router.put('/:id', auth, validateEntryInput, async (req, res) => {
+    try {
+        const {
+            title,
+            content,
+            mood,
+            tags,
+            activities,
+            gratitude,
+            goals,
+            weather
+        } = req.body;
+
+        const entry = await Entry.findOne({
+            _id: req.params.id,
+            user: req.user._id
+        });
+
+        if (!entry) {
+            return res.status(404).json({
+                message: 'Entry not found'
+            });
+        }
+
+        // Update fields
+        if (title !== undefined) entry.title = title.trim();
+        entry.content = content.trim();
+        entry.mood = parseInt(mood);
+        if (tags !== undefined) entry.tags = tags;
+        if (activities !== undefined) entry.activities = activities;
+        if (gratitude !== undefined) entry.gratitude = gratitude;
+        if (goals !== undefined) entry.goals = goals;
+        if (weather !== undefined) entry.weather = weather;
+
+        await entry.save();
+        await entry.populate('user', 'name');
+
+        res.json({
+            message: 'Entry updated successfully',
+            entry
+        });
+
+    } catch (error) {
+        console.error('Update entry error:', error);
+        
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                message: 'Invalid entry ID'
+            });
+        }
+        
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                message: 'Validation failed',
+                errors
+            });
+        }
+        
+        res.status(500).json({
+            message: 'Server error updating entry'
+        });
+    }
+});
+
+// @route   DELETE /api/entries/:id
+// @desc    Delete entry
+// @access  Private
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const entry = await Entry.findOne({
+            _id: req.params.id,
+            user: req.user._id
+        });
+
+        if (!entry) {
+            return res.status(404).json({
+                message: 'Entry not found'
+            });
+        }
+
+        await Entry.findByIdAndDelete(req.params.id);
+
+        // Update user stats (decrease total entries)
+        const user = await User.findById(req.user._id);
+        if (user.stats.totalEntries > 0) {
+            user.stats.totalEntries -= 1;
+        }
+        await user.save();
+
+        res.json({
+            message: 'Entry deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('Delete entry error:', error);
+        
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                message: 'Invalid entry ID'
+            });
+        }
+        
+        res.status(500).json({
+            message: 'Server error deleting entry'
+        });
+    }
+});
+
+// @route   GET /api/entries/analytics/mood
+// @desc    Get mood analytics for user
+// @access  Private
+router.get('/analytics/mood', auth, async (req, res) => {
+    try {
+        const { days = 30 } = req.query;
+        
+        const analytics = await Entry.getMoodAnalytics(req.user._id, parseInt(days));
+        
+        res.json({
+            analytics: {
+                averageMood: Math.round(analytics.averageMood * 10) / 10,
+                totalEntries: analytics.totalEntries,
+                moodDistribution: analytics.moodDistribution,
+                period: `${days} days`
+            }
+        });
+
+    } catch (error) {
+        console.error('Get mood analytics error:', error);
+        res.status(500).json({
+            message: 'Server error retrieving analytics'
+        });
+    }
+});
+
+// @route   GET /api/entries/analytics/trends
+// @desc    Get mood trends by day
+// @access  Private
+router.get('/analytics/trends', auth, async (req, res) => {
+    try {
+        const { days = 7 } = req.query;
+        
+        const trends = await Entry.getMoodTrends(req.user._id, parseInt(days));
+        
+        res.json({
+            trends: trends.map(trend => ({
+                date: trend._id,
+                averageMood: Math.round(trend.averageMood * 10) / 10,
+                entryCount: trend.entryCount
+            })),
+            period: `${days} days`
+        });
+
+    } catch (error) {
+        console.error('Get mood trends error:', error);
+        res.status(500).json({
+            message: 'Server error retrieving trends'
+        });
+    }
+});
+
+// @route   GET /api/entries/search
+// @desc    Search entries by content or tags
+// @access  Private
+router.get('/search/:query', auth, async (req, res) => {
+    try {
+        const { query } = req.params;
+        const { limit = 10 } = req.query;
+
+        if (!query || query.trim().length === 0) {
+            return res.status(400).json({
+                message: 'Search query is required'
+            });
+        }
+
+        const entries = await Entry.find({
+            user: req.user._id,
+            $or: [
+                { content: { $regex: query, $options: 'i' } },
+                { title: { $regex: query, $options: 'i' } },
+                { tags: { $in: [new RegExp(query, 'i')] } }
+            ]
+        })
+        .sort({ entryDate: -1 })
+        .limit(parseInt(limit))
+        .populate('user', 'name');
+
+        res.json({
+            query,
+            results: entries,
+            count: entries.length
+        });
+
+    } catch (error) {
+        console.error('Search entries error:', error);
+        res.status(500).json({
+            message: 'Server error searching entries'
+        });
+    }
+});
+
+module.exports = router;
