@@ -1,0 +1,120 @@
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: [true, 'Name is required'],
+        trim: true,
+        maxlength: [50, 'Name cannot be more than 50 characters']
+    },
+    email: {
+        type: String,
+        required: [true, 'Email is required'],
+        unique: true,
+        lowercase: true,
+        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+    },
+    password: {
+        type: String,
+        required: [true, 'Password is required'],
+        minlength: [6, 'Password must be at least 6 characters long']
+    },
+    avatar: {
+        type: String,
+        default: null
+    },
+    preferences: {
+        theme: {
+            type: String,
+            enum: ['light', 'dark'],
+            default: 'light'
+        },
+        reminderTime: {
+            type: String,
+            default: '20:00'
+        },
+        emailNotifications: {
+            type: Boolean,
+            default: true
+        }
+    },
+    stats: {
+        totalEntries: {
+            type: Number,
+            default: 0
+        },
+        currentStreak: {
+            type: Number,
+            default: 0
+        },
+        longestStreak: {
+            type: Number,
+            default: 0
+        },
+        lastEntryDate: {
+            type: Date,
+            default: null
+        }
+    }
+}, {
+    timestamps: true
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+    // Only hash the password if it has been modified (or is new)
+    if (!this.isModified('password')) return next();
+    
+    try {
+        // Hash password with cost of 12
+        const hashedPassword = await bcrypt.hash(this.password, 12);
+        this.password = hashedPassword;
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Update user stats when new entry is created
+userSchema.methods.updateStats = function(entryDate) {
+    this.stats.totalEntries += 1;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const lastEntry = this.stats.lastEntryDate ? new Date(this.stats.lastEntryDate) : null;
+    if (lastEntry) {
+        lastEntry.setHours(0, 0, 0, 0);
+    }
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (!lastEntry || lastEntry.getTime() === yesterday.getTime()) {
+        // Continue or start streak
+        this.stats.currentStreak += 1;
+        if (this.stats.currentStreak > this.stats.longestStreak) {
+            this.stats.longestStreak = this.stats.currentStreak;
+        }
+    } else if (lastEntry.getTime() !== today.getTime()) {
+        // Streak broken
+        this.stats.currentStreak = 1;
+    }
+    
+    this.stats.lastEntryDate = entryDate;
+};
+
+// Remove password from JSON output
+userSchema.methods.toJSON = function() {
+    const user = this.toObject();
+    delete user.password;
+    return user;
+};
+
+module.exports = mongoose.model('User', userSchema);
