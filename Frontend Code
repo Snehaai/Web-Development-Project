@@ -1,582 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindful Moments</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #e9ecef;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .logo::before {
-            content: "●";
-            color: #28a745;
-            margin-right: 8px;
-            font-size: 24px;
-        }
-
-        .nav {
-            display: flex;
-            gap: 30px;
-        }
-
-        .nav a {
-            text-decoration: none;
-            color: #666;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav a:hover, .nav a.active {
-            color: #333;
-        }
-
-        .user-profile {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
-
-        /* Main Content */
-        .main-title {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #2c3e50;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        /* Mood Selector */
-        .mood-selector {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-
-        .mood-emoji {
-            font-size: 32px;
-            padding: 15px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #fff;
-            border: 2px solid transparent;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .mood-emoji:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-
-        .mood-emoji.selected {
-            border-color: #007bff;
-            background: #e3f2fd;
-        }
-
-        /* Journal Input */
-        .journal-input {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .journal-textarea {
-            width: 100%;
-            min-height: 120px;
-            border: none;
-            resize: vertical;
-            font-size: 16px;
-            line-height: 1.6;
-            color: #333;
-            background: transparent;
-            outline: none;
-        }
-
-        .journal-textarea::placeholder {
-            color: #999;
-        }
-
-        .save-btn {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            float: right;
-            transition: background 0.3s;
-        }
-
-        .save-btn:hover {
-            background: #555;
-        }
-
-        /* Past Entries */
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-
-        .entry-item {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-            transition: transform 0.2s;
-        }
-
-        .entry-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-        }
-
-        .entry-icon {
-            width: 40px;
-            height: 40px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .entry-content {
-            flex: 1;
-        }
-
-        .entry-date {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .entry-text {
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .entry-mood {
-            font-size: 20px;
-            margin-left: auto;
-        }
-
-        /* Mood Trends */
-        .mood-trends {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 30px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-        }
-
-        .trend-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .trend-label {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .trend-average {
-            font-size: 36px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-
-        .trend-change {
-            color: #28a745;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .chart-container {
-            height: 150px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chart-line {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #007bff;
-            transform: translateY(-50%);
-        }
-
-        .chart-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #999;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-
-            .nav {
-                gap: 20px;
-            }
-
-            .mood-selector {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .mood-emoji {
-                font-size: 28px;
-                padding: 12px;
-            }
-
-            .main-title {
-                font-size: 24px;
-            }
-        }
-
-        .delete-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .delete-btn:hover {
-            background: #c82333;
-        }
-
-        .edit-btn {
-            background: #ffc107;
-            color: #212529;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-
-        .edit-btn:hover {
-            background: #e0a800;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mindful Moments</title>
+  <style>
+    body { font-family: sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .main-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 20px; }
+    .mood-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+    .mood-emoji { font-size: 28px; cursor: pointer; padding: 10px; border-radius: 50%; border: 2px solid transparent; background: #fff; }
+    .mood-emoji.selected { border-color: #007bff; background: #e3f2fd; }
+    .journal-input { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+    .journal-textarea { width: 100%; min-height: 100px; border: none; font-size: 16px; outline: none; }
+    .save-btn { background: #333; color: white; padding: 10px 20px; border: none; border-radius: 6px; float: right; }
+    .entry-item { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; justify-content: space-between; }
+    .entry-content { flex: 1; }
+    .entry-date { font-weight: bold; margin-bottom: 5px; }
+    .edit-btn, .delete-btn { margin-left: 10px; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; }
+    .edit-btn { background: #ffc107; }
+    .delete-btn { background: #dc3545; color: white; }
+    .mood-trends { background: #fff; border-radius: 8px; padding: 20px; margin-top: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .trend-average { font-size: 20px; font-weight: bold; }
+    .trend-change { font-size: 14px; margin-top: 5px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">Mindful Moments</div>
-            <nav class="nav">
-                <a href="#" class="active">Home</a>
-                <a href="#">Journal</a>
-                <a href="#">Insights</a>
-                <a href="#">Community</a>
-            </nav>
-            <div class="user-profile">S</div>
-        </div>
+<div class="container">
+  <h1 class="main-title">How are you feeling today?</h1>
+  <p class="subtitle">Choose an emoji that best represents your mood.</p>
 
-        <!-- Main Content -->
-        <h1 class="main-title">How are you feeling today, Sarah?</h1>
-        <p class="subtitle">Choose an emoji that best represents your mood.</p>
+  <!-- Mood Selector -->
+  <div class="mood-selector">
+    <div class="mood-emoji" data-mood="1">😢</div>
+    <div class="mood-emoji" data-mood="2">😟</div>
+    <div class="mood-emoji" data-mood="3">😐</div>
+    <div class="mood-emoji" data-mood="4">🙂</div>
+    <div class="mood-emoji" data-mood="5">😊</div>
+  </div>
 
-        <!-- Mood Selector -->
-        <div class="mood-selector">
-            <div class="mood-emoji" data-mood="1">😢</div>
-            <div class="mood-emoji" data-mood="2">😟</div>
-            <div class="mood-emoji" data-mood="3">😐</div>
-            <div class="mood-emoji" data-mood="4">🙂</div>
-            <div class="mood-emoji" data-mood="5">😊</div>
-        </div>
+  <!-- Journal Input -->
+  <div class="journal-input">
+    <textarea class="journal-textarea" id="journalText" placeholder="Write about your day..."></textarea>
+    <button class="save-btn" id="saveBtn">Save Entry</button>
+    <div style="clear:both"></div>
+  </div>
 
-        <!-- Journal Input -->
-        <div class="journal-input">
-            <textarea class="journal-textarea" placeholder="Write about your day..." id="journalText"></textarea>
-            <button class="save-btn" onclick="saveEntry()">Save Entry</button>
-            <div style="clear: both;"></div>
-        </div>
+  <!-- Past Entries -->
+  <h2>Past Entries</h2>
+  <div id="entriesContainer"></div>
 
-        <!-- Past Entries -->
-        <h2 class="section-title">Past Entries</h2>
-        <div id="entriesContainer">
-            <!-- Entries will be dynamically loaded here -->
-        </div>
+  <!-- Mood Trends -->
+  <div class="mood-trends">
+    <h2>Mood Trends</h2>
+    <div class="trend-average">Average Mood: <span id="averageMood">-</span></div>
+    <div class="trend-change" id="trendChange">Last 7 Days: -</div>
+  </div>
+</div>
 
-        <!-- Mood Trends -->
-        <div class="mood-trends">
-            <h2 class="section-title">Mood Trends</h2>
-            <div class="trend-header">
-                <div>
-                    <div class="trend-label">Mood Trend</div>
-                    <div class="trend-average">Average: <span id="averageMood">3.5</span></div>
-                    <div class="trend-change">Last 7 Days: <span id="trendChange">+10%</span></div>
-                </div>
-            </div>
-            <div class="chart-container">
-                <div class="chart-line"></div>
-            </div>
-            <div class="chart-labels">
-                <span>Mon</span>
-                <span>Tue</span>
-                <span>Wed</span>
-                <span>Thu</span>
-                <span>Fri</span>
-                <span>Sat</span>
-                <span>Sun</span>
-            </div>
-        </div>
-    </div>
+<script>
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000/api" : "/api";
 
-    <script>
-        // Global variables
-        let selectedMood = null;
-        let editingId = null;
-        let entries = [];
+let selectedMood = null;
+let editingId = null;
+let entries = [];
 
-        // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            loadEntries();
-            setupEventListeners();
-        });
+// Setup
+document.addEventListener("DOMContentLoaded", () => {
+  setupEventListeners();
+  loadEntries();
+  loadAnalytics();
+});
 
-        function setupEventListeners() {
-            // Mood selector event listeners
-            document.querySelectorAll('.mood-emoji').forEach(emoji => {
-                emoji.addEventListener('click', function() {
-                    selectMood(this.dataset.mood);
-                });
-            });
-        }
+function setupEventListeners() {
+  document.querySelectorAll(".mood-emoji").forEach(e => {
+    e.addEventListener("click", () => selectMood(e.dataset.mood));
+  });
+  document.getElementById("saveBtn").addEventListener("click", saveEntry);
+}
 
-        function selectMood(mood) {
-            // Remove previous selection
-            document.querySelectorAll('.mood-emoji').forEach(emoji => {
-                emoji.classList.remove('selected');
-            });
-            
-            // Add selection to clicked emoji
-            document.querySelector(`[data-mood="${mood}"]`).classList.add('selected');
-            selectedMood = parseInt(mood);
-        }
+// Mood
+function selectMood(mood) {
+  document.querySelectorAll(".mood-emoji").forEach(e => e.classList.remove("selected"));
+  document.querySelector(`.mood-emoji[data-mood="${mood}"]`).classList.add("selected");
+  selectedMood = parseInt(mood);
+}
 
-        function saveEntry() {
-            const journalText = document.getElementById('journalText').value;
-            
-            if (!journalText.trim()) {
-                alert('Please write something in your journal entry.');
-                return;
-            }
-            
-            if (!selectedMood) {
-                alert('Please select a mood emoji.');
-                return;
-            }
+// CRUD
+async function loadEntries() {
+  const res = await fetch(`${API_BASE}/entries`);
+  entries = await res.json();
+  displayEntries();
+}
 
-            const entry = {
-                id: editingId || Date.now(),
-                text: journalText,
-                mood: selectedMood,
-                date: new Date().toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }),
-                timestamp: new Date()
-            };
+async function saveEntry() {
+  const text = document.getElementById("journalText").value.trim();
+  if (!text || !selectedMood) return alert("Please write and pick a mood!");
 
-            if (editingId) {
-                // Update existing entry
-                const index = entries.findIndex(e => e.id === editingId);
-                if (index !== -1) {
-                    entries[index] = entry;
-                }
-                editingId = null;
-                document.querySelector('.save-btn').textContent = 'Save Entry';
-            } else {
-                // Add new entry
-                entries.unshift(entry);
-            }
+  const entry = { text, mood: selectedMood };
+  let res;
 
-            // Save to localStorage (for frontend-only version)
-            localStorage.setItem('journalEntries', JSON.stringify(entries));
+  if (editingId) {
+    res = await fetch(`${API_BASE}/entries/${editingId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+    editingId = null;
+    document.getElementById("saveBtn").textContent = "Save Entry";
+  } else {
+    res = await fetch(`${API_BASE}/entries`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    });
+  }
+  document.getElementById("journalText").value = "";
+  selectedMood = null;
+  document.querySelectorAll(".mood-emoji").forEach(e => e.classList.remove("selected"));
+  await loadEntries();
+  await loadAnalytics();
+}
 
-            // Clear form
-            document.getElementById('journalText').value = '';
-            document.querySelectorAll('.mood-emoji').forEach(emoji => {
-                emoji.classList.remove('selected');
-            });
-            selectedMood = null;
+function displayEntries() {
+  const container = document.getElementById("entriesContainer");
+  if (!entries.length) {
+    container.innerHTML = "<p>No entries yet.</p>";
+    return;
+  }
+  container.innerHTML = entries.map(e => `
+    <div class="entry-item">
+      <div class="entry-content">
+        <div class="entry-date">${new Date(e.createdAt).toLocaleDateString()}</div>
+        <div class="entry-text">${e.text}</div>
+      </div>
+      <div>${getMoodEmoji(e.mood)}</div>
+      <div>
+        <button class="edit-btn" onclick="editEntry('${e._id}')">Edit</button>
+        <button class="delete-btn" onclick="deleteEntry('${e._id}')">Delete</button>
+      </div>
+    </div>`).join("");
+}
 
-            // Refresh display
-            loadEntries();
-            updateMoodTrends();
-        }
+async function deleteEntry(id) {
+  if (!confirm("Delete this entry?")) return;
+  await fetch(`${API_BASE}/entries/${id}`, { method: "DELETE" });
+  await loadEntries();
+  await loadAnalytics();
+}
 
-        function loadEntries() {
-            // Load from localStorage (for frontend-only version)
-            const stored = localStorage.getItem('journalEntries');
-            if (stored) {
-                entries = JSON.parse(stored);
-            }
+function editEntry(id) {
+  const e = entries.find(en => en._id === id);
+  if (!e) return;
+  document.getElementById("journalText").value = e.text;
+  selectMood(e.mood);
+  editingId = id;
+  document.getElementById("saveBtn").textContent = "Update Entry";
+}
 
-            displayEntries();
-        }
+// Trends
+async function loadAnalytics() {
+  const res = await fetch(`${API_BASE}/entries/analytics`);
+  const data = await res.json();
+  document.getElementById("averageMood").textContent = data.average?.toFixed(1) || "-";
+  document.getElementById("trendChange").textContent = `Last 7 Days: ${data.change || "-"}`;
+}
 
-        function displayEntries() {
-            const container = document.getElementById('entriesContainer');
-            
-            if (entries.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No entries yet. Start writing your first journal entry!</p>';
-                return;
-            }
-
-            container.innerHTML = entries.map(entry => `
-                <div class="entry-item">
-                    <div class="entry-icon">📝</div>
-                    <div class="entry-content">
-                        <div class="entry-date">${entry.date}</div>
-                        <div class="entry-text">${entry.text}</div>
-                    </div>
-                    <div class="entry-mood">${getMoodEmoji(entry.mood)}</div>
-                    <button class="edit-btn" onclick="editEntry(${entry.id})">Edit</button>
-                    <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
-                </div>
-            `).join('');
-        }
-
-        function getMoodEmoji(mood) {
-            const emojis = ['', '😢', '😟', '😐', '🙂', '😊'];
-            return emojis[mood] || '😐';
-        }
-
-        function deleteEntry(id) {
-            if (confirm('Are you sure you want to delete this entry?')) {
-                entries = entries.filter(entry => entry.id !== id);
-                localStorage.setItem('journalEntries', JSON.stringify(entries));
-                displayEntries();
-                updateMoodTrends();
-            }
-        }
-
-        function editEntry(id) {
-            const entry = entries.find(e => e.id === id);
-            if (entry) {
-                document.getElementById('journalText').value = entry.text;
-                selectMood(entry.mood);
-                editingId = id;
-                document.querySelector('.save-btn').textContent = 'Update Entry';
-                
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        function updateMoodTrends() {
-            if (entries.length === 0) return;
-
-            // Calculate average mood
-            const totalMood = entries.reduce((sum, entry) => sum + entry.mood, 0);
-            const average = (totalMood / entries.length).toFixed(1);
-            document.getElementById('averageMood').textContent = average;
-
-            // Calculate trend (simplified)
-            const recentEntries = entries.slice(0, 7);
-            const olderEntries = entries.slice(7, 14);
-            
-            if (olderEntries.length > 0) {
-                const recentAvg = recentEntries.reduce((sum, entry) => sum + entry.mood, 0) / recentEntries.length;
-                const olderAvg = olderEntries.reduce((sum, entry) => sum + entry.mood, 0) / olderEntries.length;
-                const change = ((recentAvg - olderAvg) / olderAvg * 100).toFixed(0);
-                
-                const changeElement = document.getElementById('trendChange');
-                if (change > 0) {
-                    changeElement.textContent = `+${change}%`;
-                    changeElement.style.color = '#28a745';
-                } else {
-                    changeElement.textContent = `${change}%`;
-                    changeElement.style.color = change < 0 ? '#dc3545' : '#28a745';
-                }
-            }
-        }
-
-        // Initialize mood trends on load
-        updateMoodTrends();
-    </script>
+function getMoodEmoji(mood) {
+  return ["","😢","😟","😐","🙂","😊"][mood] || "😐";
+}
+</script>
 </body>
 </html>
